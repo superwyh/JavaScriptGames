@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sokaban</title>
+    <style>
+        #gameArea {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            border: 1px solid #000;
+        }
+        .box, .player {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+        .box {
+            background-color: blue;
+        }
+        .player {
+            background-color: red;
+        }
+        .target {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            border: 2px dashed green;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div class="box" style="left: 40px; top: 40px;"></div>
+        <div class="box" style="left: 80px; top: 40px;"></div>
+        <div class="target" style="left: 40px; top: 160px;"></div>
+        <div class="target" style="left: 80px; top: 160px;"></div>
+        <div class="player" style="left: 0; top: 0;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', movePlayer);
+
+        const player = document.querySelector('.player');
+        const boxes = document.querySelectorAll('.box');
+        let playerX = 0;
+        let playerY = 0;
+
+        function movePlayer(e) {
+            let dx = 0;
+            let dy = 0;
+
+            switch(e.key) {
+                case "ArrowLeft":
+                    dx = -40;
+                    break;
+                case "ArrowRight":
+                    dx = 40;
+                    break;
+                case "ArrowUp":
+                    dy = -40;
+                    break;
+                case "ArrowDown":
+                    dy = 40;
+                    break;
+                default:
+                    return; // 如果按下的不是箭头键，不执行任何操作
+            }
+
+            const newX = playerX + dx;
+            const newY = playerY + dy;
+
+            // 检查新位置是否超出游戏区域
+            if (!isInsideGameArea(newX, newY)) {
+                return;
+            }
+
+            // 检查新位置是否有箱子
+            const box = getBoxAt(newX, newY);
+            if (box) {
+                // 尝试移动箱子
+                const boxNewX = newX + dx;
+                const boxNewY = newY + dy;
+
+                // 如果箱子后面的位置是空的，移动箱子和玩家
+                if (!getBoxAt(boxNewX, boxNewY) && isInsideGameArea(boxNewX, boxNewY)) {
+                    moveElement(box, boxNewX, boxNewY);
+                    moveElement(player, newX, newY);
+                    playerX = newX;
+                    playerY = newY;
+                }
+            } else {
+                // 如果新位置没有箱子，直接移动玩家
+                moveElement(player, newX, newY);
+                playerX = newX;
+                playerY = newY;
+            }
+        }
+
+        function isInsideGameArea(x, y) {
+            return x >= 0 && y >= 0 && x <= 160 && y <= 160;
+        }
+
+        function getBoxAt(x, y) {
+            for (const box of boxes) {
+                const boxX = parseInt(box.style.left, 10);
+                const boxY = parseInt(box.style.top, 10);
+                if (boxX === x && boxY === y) {
+                    return box;
+                }
+            }
+            return null;
+        }
+
+        function moveElement(element, x, y) {
+            element.style.left = x + 'px';
+            element.style.top = y + 'px';
+        }
+    </script>
+</body>
+</html>

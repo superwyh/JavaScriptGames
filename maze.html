@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>走迷宫游戏</title>
+    <style>
+        #maze {
+            border: 1px solid black;
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+        .cell {
+            box-sizing: border-box;
+            border: 1px solid grey;
+            float: left;
+        }
+        .path {
+            background-color: white;
+        }
+        .wall {
+            background-color: black;
+        }
+        .player {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="maze"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mazeElement = document.getElementById('maze');
+            const mazeSize = 20; // 迷宫大小 20x20
+            const cellSize = mazeElement.clientWidth / mazeSize;
+            const maze = generateMaze(mazeSize);
+            const player = { x: 0, y: 0 }; // 玩家初始位置
+
+            displayMaze(maze);
+            movePlayer(player.x, player.y);
+
+            document.addEventListener('keydown', function(e) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        if (player.x > 0 && maze[player.y][player.x - 1] == 0) {
+                            movePlayer(player.x - 1, player.y);
+                        }
+                        break;
+                    case 'ArrowRight':
+                        if (player.x < mazeSize - 1 && maze[player.y][player.x + 1] == 0) {
+                            movePlayer(player.x + 1, player.y);
+                        }
+                        break;
+                    case 'ArrowUp':
+                        if (player.y > 0 && maze[player.y - 1][player.x] == 0) {
+                            movePlayer(player.x, player.y - 1);
+                        }
+                        break;
+                    case 'ArrowDown':
+                        if (player.y < mazeSize - 1 && maze[player.y + 1][player.x] == 0) {
+                            movePlayer(player.x, player.y + 1);
+                        }
+                        break;
+                }
+            });
+
+            function generateMaze(size) {
+                // 这里应该是迷宫生成算法的实现
+                // 为简化，这里只是创建一个空迷宫
+                let maze = [];
+                for (let y = 0; y < size; y++) {
+                    maze[y] = [];
+                    for (let x = 0; x < size; x++) {
+                        maze[y][x] = Math.random() < 0.3 ? 1 : 0; // 随机生成墙（1）和路径（0）
+                    }
+                }
+                maze[0][0] = 0; // 确保起点是可达的
+                maze[size - 1][size - 1] = 0; // 确保终点是可达的
+                return maze;
+            }
+
+            function displayMaze(maze) {
+                mazeElement.innerHTML = ''; // 清空当前迷宫
+                maze.forEach((row, y) => {
+                    row.forEach((cell, x) => {
+                        let cellElement = document.createElement('div');
+                        cellElement.className = cell === 1 ? 'cell wall' : 'cell path';
+                        cellElement.style.width = `${cellSize}px`;
+                        cellElement.style.height = `${cellSize}px`;
+                        mazeElement.appendChild(cellElement);
+                    });
+                });
+            }
+
+            function movePlayer(x, y) {
+                let playerElement = document.querySelector('.player');
+                if (!playerElement) {
+                    playerElement = document.createElement('div');
+                    playerElement.className = 'player';
+                    mazeElement.appendChild(playerElement);
+                }
+                player.x = x;
+                player.y = y;
+                playerElement.style.left = `${x * cellSize}px`;
+                playerElement.style.top = `${y * cellSize}px`;
+            }
+        });
+    </script>
+</body>
+</html>

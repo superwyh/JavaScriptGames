@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>简单平台游戏</title>
+    <style>
+        #gameArea {
+            width: 400px;
+            height: 300px;
+            border: 1px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+        .player {
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div class="player"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const player = document.querySelector('.player');
+            let isJumping = false;
+            let gravity = 0.9;
+            let jumpSpeed = 15;
+            let currentPosition = 0;
+            let targetPosition = 0;
+            let lerpSpeed = 0.3;
+            let moveLeftActive = false;
+            let moveRightActive = false;
+
+            function control(e) {
+                if (e.type === "keydown") {
+                    if (e.keyCode === 32 && !isJumping) {
+                        isJumping = true;
+                        jump();
+                    } else if (e.keyCode === 37) {
+                        moveLeftActive = true;
+                    } else if (e.keyCode === 39) {
+                        moveRightActive = true;
+                    }
+                } else if (e.type === "keyup") {
+                    if (e.keyCode === 37) {
+                        moveLeftActive = false;
+                    } else if (e.keyCode === 39) {
+                        moveRightActive = false;
+                    }
+                }
+            }
+
+            function gameLoop() {
+                moveLeft();
+                moveRight();
+                if (!isJumping) {
+                    currentPosition = lerp(currentPosition, 0, gravity);
+                    player.style.bottom = currentPosition + 'px';
+                }
+                requestAnimationFrame(gameLoop);
+            }
+
+            function moveLeft() {
+                if (moveLeftActive) {
+                    let leftPosition = parseInt(window.getComputedStyle(player).getPropertyValue('left'));
+                    if (leftPosition > 0) player.style.left = leftPosition - 5 + 'px';
+                }
+            }
+
+            function moveRight() {
+                if (moveRightActive) {
+                    let leftPosition = parseInt(window.getComputedStyle(player).getPropertyValue('left'));
+                    if (leftPosition < 370) player.style.left = leftPosition + 5 + 'px';
+                }
+            }
+
+            function jump() {
+                targetPosition = 150;
+                let jumpUp = true;
+
+                function jumpFrame() {
+                    if (jumpUp && currentPosition < targetPosition) {
+                        currentPosition += jumpSpeed;
+                        if (currentPosition >= targetPosition) {
+                            jumpUp = false;
+                        }
+                    } else {
+                        currentPosition -= jumpSpeed;
+                        if (currentPosition <= 0) {
+                            currentPosition = 0;
+                            isJumping = false;
+                            return;
+                        }
+                    }
+                    player.style.bottom = currentPosition + 'px';
+                    requestAnimationFrame(jumpFrame);
+                }
+                jumpFrame();
+            }
+
+            function lerp(start, end, amt) {
+                return (1 - amt) * start + amt * end;
+            }
+
+            document.addEventListener('keydown', control);
+            document.addEventListener('keyup', control);
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+</body>
+</html>
