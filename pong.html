@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Game</title>
+    <style>
+        canvas {
+            background: #000;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speedX: 2,
+            speedY: 2
+        };
+
+        let paddle1 = {
+            x: 0,
+            y: canvas.height / 2 - 40,
+            width: 10,
+            height: 80,
+            speed: 0
+        };
+
+        let paddle2 = {
+            x: canvas.width - 10,
+            y: canvas.height / 2 - 40,
+            width: 10,
+            height: 80,
+            speed: 0
+        };
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+            ctx.fillStyle = "#FFF";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawPaddle(paddle) {
+            ctx.beginPath();
+            ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+            ctx.fillStyle = "#FFF";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function movePaddle() {
+            paddle1.y += paddle1.speed;
+            paddle2.y += paddle2.speed;
+
+            // 防止挡板移出画布
+            paddle1.y = Math.max(Math.min(paddle1.y, canvas.height - paddle1.height), 0);
+            paddle2.y = Math.max(Math.min(paddle2.y, canvas.height - paddle2.height), 0);
+        }
+
+        function updateBall() {
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // 球与挡板碰撞检测
+            if (ball.x - ball.radius < paddle1.x + paddle1.width && ball.y > paddle1.y && ball.y < paddle1.y + paddle1.height) {
+                ball.speedX = -ball.speedX;
+            }
+
+            if (ball.x + ball.radius > paddle2.x && ball.y > paddle2.y && ball.y < paddle2.y + paddle2.height) {
+                ball.speedX = -ball.speedX;
+            }
+
+            // 球与上下边界碰撞检测
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.speedY = -ball.speedY;
+            }
+
+            // 球出界检测
+            if (ball.x + ball.radius < 0 || ball.x - ball.radius > canvas.width) {
+                // 重置球的位置
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                ball.speedX = 2;
+                ball.speedY = 2;
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            drawPaddle(paddle1);
+            drawPaddle(paddle2);
+            updateBall();
+            movePaddle();
+            requestAnimationFrame(draw);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            switch(event.code) {
+                case "ArrowUp":
+                    paddle2.speed = -6;
+                    break;
+                case "ArrowDown":
+                    paddle2.speed = 6;
+                    break;
+                case "KeyW":
+                    paddle1.speed = -6;
+                    break;
+                case "KeyS":
+                    paddle1.speed = 6;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            switch(event.code) {
+                case "ArrowUp":
+                case "ArrowDown":
+                    paddle2.speed = 0;
+                    break;
+                case "KeyW":
+                case "KeyS":
+                    paddle1.speed = 0;
+                    break;
+            }
+        });
+
+        draw();
+    </script>
+</body>
+</html>

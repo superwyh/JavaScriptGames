@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Match Three</title>
+    <style>
+        #gameBoard {
+            width: 320px;
+            height: 320px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameBoard"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const boardSize = 8;
+            const gameBoard = document.getElementById('gameBoard');
+            let grid = [];
+            let firstClick = null;
+
+            function createBoard() {
+                for (let i = 0; i < boardSize * boardSize; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    const cellValue = Math.floor(Math.random() * 5) + 1;
+                    cell.textContent = cellValue;
+                    cell.style.backgroundColor = getColorForValue(cellValue);
+                    cell.setAttribute('data-id', i);
+                    cell.addEventListener('click', cellClicked);
+                    gameBoard.appendChild(cell);
+                    grid.push(cell);
+                }
+            }
+
+            function getColorForValue(value) {
+                switch (value) {
+                    case 1: return 'red';
+                    case 2: return 'blue';
+                    case 3: return 'green';
+                    case 4: return 'yellow';
+                    case 5: return 'purple';
+                }
+            }
+
+            function cellClicked() {
+                const clickedIndex = parseInt(this.getAttribute('data-id'));
+
+                if (firstClick === null) {
+                    firstClick = clickedIndex;
+                } else {
+                    if (isAdjacent(firstClick, clickedIndex)) {
+                        swapCells(firstClick, clickedIndex);
+                        checkForMatches();
+                    }
+                    firstClick = null;
+                }
+            }
+
+            function isAdjacent(index1, index2) {
+                const row1 = Math.floor(index1 / boardSize);
+                const col1 = index1 % boardSize;
+                const row2 = Math.floor(index2 / boardSize);
+                const col2 = index2 % boardSize;
+
+                return (row1 === row2 && Math.abs(col1 - col2) === 1) ||
+                    (col1 === col2 && Math.abs(row1 - row2) === 1);
+            }
+
+            function swapCells(index1, index2) {
+                const value1 = grid[index1].textContent;
+                const value2 = grid[index2].textContent;
+
+                grid[index1].textContent = value2;
+                grid[index1].style.backgroundColor = getColorForValue(parseInt(value2));
+
+                grid[index2].textContent = value1;
+                grid[index2].style.backgroundColor = getColorForValue(parseInt(value1));
+            }
+
+            function checkForMatches() {
+                for (let i = 0; i < grid.length; i++) {
+                    let row = Math.floor(i / boardSize);
+                    let col = i % boardSize;
+
+                    let value = grid[i].textContent;
+
+                    // Check horizontally
+                    if (col < boardSize - 2) {
+                        if (grid[i + 1].textContent === value && grid[i + 2].textContent === value) {
+                            grid[i].style.backgroundColor = 'white';
+                            grid[i + 1].style.backgroundColor = 'white';
+                            grid[i + 2].style.backgroundColor = 'white';
+                        }
+                    }
+
+                    // Check vertically
+                    if (row < boardSize - 2) {
+                        if (grid[i + boardSize].textContent === value && grid[i + boardSize * 2].textContent === value) {
+                            grid[i].style.backgroundColor = 'white';
+                            grid[i + boardSize].style.backgroundColor = 'white';
+                            grid[i + boardSize * 2].style.backgroundColor = 'white';
+                        }
+                    }
+                }
+            }
+
+            createBoard();
+        });
+
+
+
+    </script>
+</body>
+
+</html>
